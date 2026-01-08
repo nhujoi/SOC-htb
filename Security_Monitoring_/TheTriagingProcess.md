@@ -13,7 +13,6 @@ Leo thang là một khía cạnh quan trọng của quá trình phân loại tro
 ---
 
 ## 2. Quy trình Phân loại Lý tưởng (The Ideal Triaging Process)
-[Image of security alert triaging process flowchart]
 
 Để xử lý cảnh báo hiệu quả, các chuyên gia SOC nên tuân theo một quy trình có cấu trúc bao gồm các bước sau:
 

@@ -42,7 +42,4 @@ Dùng để phân tích mối quan hệ giữa 4 thành phần chính của mộ
 
 
 
-[Image of the Diamond Model of Intrusion Analysis]
-
-
 *So sánh:* Trong khi **Cyber Kill Chain** tập trung vào các giai đoạn của cuộc tấn công, **Diamond Model** tập trung vào mối quan hệ và sự tương tác giữa các thực thể trong hệ sinh thái xâm nhập.

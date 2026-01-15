@@ -1,62 +1,67 @@
-# Quy trình Phân tích Lưu lượng Mạng (The Analysis Process)
+# Quy trình Phân tích & Kỹ thuật Thu thập (The Analysis Process & Dependencies)
 
-Phân tích lưu lượng mạng (NTA) là một quy trình động, thay đổi tùy thuộc vào công cụ, quyền hạn và khả năng quan sát (visibility) mạng. Mục tiêu là xây dựng một quy trình lặp lại được để kiểm tra, phát hiện và ngăn chặn các sự cố.
+Phân tích lưu lượng mạng (NTA) là một quy trình động, mục tiêu là chia nhỏ dữ liệu để tìm ra các sai lệch so với mức chuẩn (baseline), phát hiện mã độc hoặc các truy cập trái phép (như RDP, SSH, Telnet từ internet).
 
+## 1. Hai Phương Pháp Thu Thập & Phân Tích (Analysis Dependencies)
 
+Việc thu thập và phân tích lưu lượng có thể được thực hiện theo **2 phương pháp riêng biệt**: **Thụ động (Passive)** và **Chủ động (Active)**. Dưới đây là chi tiết từng phương pháp và các yếu tố phụ thuộc:
 
-## 1. Bản chất và Mục tiêu của NTA
-* **Định nghĩa:** Là việc kiểm tra chi tiết một sự kiện hoặc quy trình để xác định nguồn gốc và tác động của nó.
-* **Mục tiêu chính:**
-    * Phân nhỏ dữ liệu thành các phần dễ hiểu.
-    * Phát hiện các sai lệch so với lưu lượng thông thường (Baseline).
-    * Nhận diện lưu lượng độc hại (ví dụ: truy cập trái phép qua RDP, SSH, Telnet từ internet).
-    * Nhận diện các dấu hiệu tiền sự cố mạng.
-* **Kết hợp:** Quan sát xu hướng lưu lượng và so sánh với mức chuẩn (baseline) vận hành.
+### Phương pháp 1: Thụ động (Passive Analysis)
+Đây là phương pháp "sao chép" dữ liệu để quan sát mà không tương tác trực tiếp hay làm ảnh hưởng đến luồng gói tin gốc.
 
-## 2. Lợi ích và Ứng dụng
-* **Khả năng quan sát (Visibility):** Đây là lợi ích lớn nhất, giúp quản trị viên nắm được mức sử dụng mạng, các máy chủ giao tiếp nhiều nhất (top-talking hosts) và luồng giao tiếp nội bộ.
-* **Công cụ phòng thủ:** NTA kết hợp với IDS/IPS, tường lửa, và các hệ thống SIEM (Splunk, ELK Stack) để cảnh báo nhanh về hành động độc hại.
-* **Vận hành hàng ngày:** Giúp khắc phục sự cố kết nối (troubleshooting) và kiểm tra xem cơ sở hạ tầng có hoạt động đúng thiết kế không.
-* **Yếu tố con người:** Không nên phụ thuộc hoàn toàn vào công cụ tự động. Cần kết hợp kỹ năng phân tích thủ công (manual checks) của con người để phát hiện những mối đe dọa tinh vi mà công cụ có thể bỏ qua.
+* **Cơ chế:** Chỉ sao chép (copy) dữ liệu đi qua để phân tích.
+* **Yêu cầu kỹ thuật (Dependencies):**
+    1.  **Cổng phản chiếu (Mirrored Port / SPAN):**
+        * Cần cấu hình Switch/Router để sao chép dữ liệu từ các nguồn khác đến cổng của bạn.
+        * Card mạng (NIC) phải đặt ở chế độ **Promiscuous mode** (chế độ hỗn tạp) để nhận toàn bộ gói tin.
+        * *Hạn chế:* Chỉ bắt được traffic trong cùng miền quảng bá (Broadcast domain). Với Wifi, phải kết nối vào đúng SSID mới bắt được dữ liệu (nếu chỉ nghe thụ động bên ngoài chỉ thấy các gói tin quảng bá SSID).
+    2.  **Lưu trữ & Xử lý:**
+        * Lượng dữ liệu giống như "hứng nước từ vòi phun" (ổn định, dễ quản lý hơn Active).
 
----
+### Phương pháp 2: Chủ động (Active / In-line Analysis)
+Đây là phương pháp can thiệp trực tiếp vào đường dây, dữ liệu sẽ chảy *xuyên qua* thiết bị thu thập.
 
-## 3. Các phương pháp Thu thập và Phụ thuộc (Analysis Dependencies)
-
-Có hai phương pháp chính để thu thập và phân tích: **Thụ động (Passive)** và **Chủ động (Active)**.
-
-
-
-### Bảng so sánh các yếu tố phụ thuộc:
-
-| Yếu tố phụ thuộc | Passive (Thụ động) | Active (Chủ động) | Mô tả chi tiết |
-| :--- | :---: | :---: | :--- |
-| **Quyền hạn (Permission)** | ☑ | ☑ | Bắt buộc phải có sự cho phép bằng văn bản từ người có thẩm quyền để đảm bảo tính pháp lý và đạo đức, đặc biệt trong các môi trường nhạy cảm (ngân hàng, y tế). |
-| **Cổng phản chiếu (Mirrored Port/SPAN)** | ☑ | ☐ | Cấu hình Switch/Router để sao chép dữ liệu sang một cổng cụ thể. Yêu cầu NIC ở chế độ *promiscuous*. Hạn chế: Chỉ bắt được traffic trong broadcast domain hoặc phải kết nối đúng SSID (với Wifi). |
-| **Công cụ thu thập (Capture Tool)** | ☑ | ☑ | Máy tính cài đặt TCPDump, Wireshark, Netminer... Lưu ý: File PCAP rất lớn và việc lọc (filter) tốn nhiều tài nguyên xử lý. |
-| **Đặt thiết bị nội tuyến (In-line Placement)** | ☐ | ☑ | Yêu cầu thay đổi cấu trúc mạng (Topology). Thiết bị đóng vai trò như một "next hop" vô hình. |
-| **Network Tap / Multi-NIC** | ☐ | ☑ | Sử dụng thiết bị TAP hoặc máy tính có 2 NIC để dòng dữ liệu chảy qua. Tốt nhất nên đặt ở liên kết Layer 3 giữa các phân đoạn mạng để bắt traffic định tuyến ra ngoài. |
-| **Lưu trữ & Sức mạnh xử lý** | ☑ | ☑ | **Passive:** Giống như hứng nước từ vòi phun (ổn định, dễ quản lý).<br>**Active:** Giống như dùng vòi cứu hỏa đổ vào tách trà (áp lực lớn, dữ liệu nhiều, yêu cầu phần cứng cực mạnh). |
+* **Cơ chế:** Thiết bị thu thập nằm chắn giữa đường truyền (In-line).
+* **Yêu cầu kỹ thuật (Dependencies):**
+    1.  **Thay đổi cấu trúc mạng (In-line Placement):**
+        * Yêu cầu thay đổi sơ đồ đấu nối (topology).
+        * Thiết bị thu thập đóng vai trò như một "next hop" vô hình về mặt định tuyến/chuyển mạch.
+    2.  **Thiết bị phần cứng (Network Tap / Multi-NIC):**
+        * Cần máy tính có 2 Card mạng (NIC) hoặc thiết bị TAP chuyên dụng.
+        * Nó hoạt động như việc thêm một Router vào giữa liên kết.
+        * *Vị trí tối ưu:* Đặt tại liên kết Layer 3 giữa các phân đoạn mạng để bắt traffic định tuyến ra ngoài (không bị giới hạn bởi VLAN như phương pháp Passive).
+    3.  **Lưu trữ & Xử lý (Cực lớn):**
+        * Lượng dữ liệu ở liên kết Layer 3 lớn hơn nhiều so với trong mạng LAN.
+        * *Ví dụ so sánh:* Giống như dùng "vòi rồng cứu hỏa" để rót nước vào tách trà. Áp lực rất lớn, đòi hỏi phần cứng cực mạnh để xử lý và ổ cứng lớn để lưu trữ.
 
 ---
 
-## 4. Tầm quan trọng của Mức chuẩn (Baseline)
+## 2. Các yếu tố chung cho cả hai phương pháp
 
-Mặc dù không phải là yêu cầu bắt buộc về mặt kỹ thuật, nhưng việc hiểu rõ **lưu lượng hàng ngày (Baseline)** là yếu tố then chốt để phân tích thành công.
+Dù chọn phương pháp nào, bạn cũng phải tuân thủ các yếu tố sau:
 
+* **Giấy phép (Permission - Quan trọng nhất):**
+    * Bắt buộc phải có văn bản đồng ý từ người có thẩm quyền.
+    * Việc thu thập dữ liệu trái phép có thể vi phạm pháp luật (đặc biệt trong ngân hàng, y tế).
+* **Công cụ thu thập (Capture Tool):**
+    * Cần máy tính cài các phần mềm như TCPDump, Wireshark, Netminer.
+    * *Lưu ý:* File PCAP rất lớn. Mỗi khi lọc (filter) trên Wireshark, máy phải phân tích lại toàn bộ file, rất tốn RAM và CPU.
 
+---
+
+## 3. Tầm quan trọng của Mức chuẩn (Baseline) trong Phân tích
+
+Đây là kỹ năng phân tích cốt lõi để biết "cái gì là bình thường" và "cái gì là bất thường".
 
 ### Tại sao cần Baseline?
-* **Lọc nhiễu:** Giúp loại bỏ nhanh chóng các giao tiếp "tốt" đã biết để tập trung vào sự bất thường.
-* **Tăng tốc độ:** Giúp phát hiện vấn đề nhanh hơn thay vì phải mò mẫm trong biển dữ liệu.
+Nếu không biết lưu lượng mạng hàng ngày trông như thế nào, việc phân tích sẽ cực kỳ tốn thời gian vì phải kiểm tra từng kết nối xem nó có hợp lệ không.
 
-### Ví dụ thực tế (Scenario):
-* **Tình huống:** Mạng công ty bị chậm (latency cao) và xuất hiện file lạ.
-* **Không có Baseline:** Bạn bắt được hàng tấn dữ liệu. Bạn phải kiểm tra từng kết nối xem nó có hợp lệ không, máy nào là máy lạ... Quá trình này cực kỳ tốn thời gian và khó khăn.
-* **Có Baseline:**
-    1.  Dùng công cụ (như Wireshark) để xem "Top talkers".
-    2.  Loại bỏ các giao tiếp bình thường.
-    3.  **Phát hiện bất thường:** Thấy 2 máy tính người dùng (User PCs) nói chuyện với nhau qua cổng **8080** hoặc **445** (SMB).
-    4.  **Kết luận:** Thông thường Web/SMB chỉ đi từ Client đến Server. Việc 2 Client kết nối trực tiếp qua các cổng này là dấu hiệu cực kỳ khả nghi (có thể là lây lan ngang hàng của mã độc hoặc kẻ tấn công).
-
-**Kết luận:** Việc hiểu rõ luồng giao thông mạng và hành vi chuẩn của các giao thức giúp giảm thiểu thiệt hại và tăng tốc độ phản ứng khi có sự cố xâm nhập.
+### Ví dụ thực tế (Scenario trong tài liệu):
+* **Tình huống:** Mạng bị chậm và xuất hiện file lạ. Bạn bắt gói tin để kiểm tra.
+* **Phân tích dựa trên Baseline:**
+    1.  Dùng công cụ lọc ra các máy gửi nhiều dữ liệu nhất (Top talkers).
+    2.  Loại bỏ các luồng giao tiếp đã biết là an toàn (Known-good).
+    3.  **Phát hiện bất thường:** Bạn thấy 2 máy tính người dùng (User PCs) kết nối với nhau qua cổng **8080** (Web) và **445** (SMB).
+    4.  **Kết luận:**
+        * Thông thường, Web và SMB chỉ đi theo chiều **Client (Máy dùng) -> Server (Máy chủ)**.
+        * Việc 2 máy Client nói chuyện trực tiếp với nhau qua các cổng này là **Rất Khả Nghi**. Đây là dấu hiệu của việc lây lan mã độc ngang hàng (lateral movement) hoặc kẻ tấn công đang khai thác tài khoản người dùng.

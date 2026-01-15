@@ -34,6 +34,7 @@ Tcpdump có rất nhiều "công tắc" (switches) để điều chỉnh việc 
 | **-q** | In ít thông tin giao thức hơn (Quiet mode). | |
 | **-w** | Ghi kết quả bắt được vào file `.pcap`. | `-w capture.pcap` |
 | **-r** | Đọc dữ liệu từ file `.pcap`. | `-r capture.pcap` |
+| **-l** | Make stdout line buffered. | `tcpdump -l | tee dat` |
 
 *Mẹo:* Dùng lệnh `man tcpdump` để xem hướng dẫn đầy đủ.
 

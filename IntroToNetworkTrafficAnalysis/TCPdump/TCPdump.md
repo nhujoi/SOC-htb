@@ -65,7 +65,7 @@ Tcpdump có rất nhiều "công tắc" (switches) để điều chỉnh việc 
 ## 4. Giải mã Kết quả Tcpdump (Tcpdump Output Breakdown)
 
 Khi nhìn vào một dòng log của Tcpdump, thông tin được sắp xếp theo cấu trúc nhất định.
-
+![alt text](image.png)
 
 | Trường (Field) | Màu sắc (trong ví dụ) | Mô tả |
 | :--- | :--- | :--- |

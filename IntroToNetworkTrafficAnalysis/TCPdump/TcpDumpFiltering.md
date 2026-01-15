@@ -102,7 +102,7 @@ Bạn có thể lọc dựa trên các bit cụ thể trong TCP header.
 * **Ví dụ tìm gói SYN:** `tcpdump -i eth0 'tcp[13] & 2 != 0'`
     * Giải thích: Byte thứ 13 trong TCP header chứa các cờ. Bit thứ 2 (giá trị 2) tương ứng với cờ SYN. Lệnh này kiểm tra xem bit đó có bật (On) không.
 
-
+sudo tcpdump -n "tcp[tcpflags] & tcp-syn != 0"
 
 ### Tài liệu tham khảo RFC (Protocol RFC Links)
 Để hiểu sâu cấu trúc gói tin:

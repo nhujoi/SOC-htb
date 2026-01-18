@@ -1,85 +1,117 @@
-# Kỹ thuật & Công cụ Thu thập Bằng chứng (Evidence Acquisition Techniques & Tools)
+# Kỹ thuật và Công cụ Thu thập Bằng chứng (Evidence Acquisition Techniques & Tools)
 
-Thu thập bằng chứng là giai đoạn then chốt trong điều tra số, bao gồm việc thu thập các hiện vật kỹ thuật số và dữ liệu từ nhiều nguồn khác nhau để bảo quản cho quá trình phân tích. Quá trình này yêu cầu các công cụ và kỹ thuật chuyên biệt để đảm bảo tính toàn vẹn (integrity), tính xác thực (authenticity) và khả năng được chấp nhận trước tòa (admissibility).
+Thu thập bằng chứng là giai đoạn quan trọng trong điều tra số (Digital Forensics), bao gồm việc thu thập các hiện vật kỹ thuật số (digital artifacts) và dữ liệu từ nhiều nguồn khác nhau. Mục tiêu là bảo tồn bằng chứng tiềm năng để phân tích, đảm bảo tính toàn vẹn, xác thực và khả năng chấp nhận trước tòa.
 
+## 1. Sao chép Pháp y (Forensic Imaging)
 
+Forensic Imaging là quá trình tạo ra một bản sao chính xác từng bit (bit-by-bit copy) của phương tiện lưu trữ kỹ thuật số (ổ cứng, SSD, USB, thẻ nhớ...).
+* **Mục đích:** Bảo tồn trạng thái gốc của dữ liệu, đảm bảo tính toàn vẹn và giá trị pháp lý. Cho phép điều tra viên phân tích trên bản sao mà không làm hỏng dữ liệu gốc.
 
-## 1. Sao chụp Pháp y (Forensic Imaging)
+### Các công cụ và giải pháp Forensic Imaging:
+1.  **FTK Imager:**
+    * Phát triển bởi AccessData (nay thuộc Exterro).
+    * Công cụ phổ biến nhất, cho phép tạo bản sao hoàn hảo và xem trước nội dung mà không làm thay đổi dữ liệu.
+2.  **AFF4 Imager:**
+    * Mã nguồn mở, miễn phí.
+    * Tính năng: Trích xuất file dựa trên thời gian tạo, phân đoạn volume, và nén ảnh để giảm thời gian sao chép.
+3.  **DD và DCFLDD:**
+    * Công cụ dòng lệnh trên Unix/Linux/macOS.
+    * *DD:* Có sẵn mặc định trên hầu hết các hệ thống Unix.
+    * *DCFLDD:* Phiên bản nâng cao của DD dành cho forensics (có thêm tính năng băm/hashing).
+4.  **Công cụ Ảo hóa (Virtualization Tools):**
+    * Thu thập từ môi trường ảo bằng cách tạm dừng hệ thống và copy thư mục chứa nó.
+    * Sử dụng tính năng **Snapshot** có sẵn trong các phần mềm ảo hóa.
 
-Đây là quy trình cơ bản liên quan đến việc tạo ra một bản sao chính xác từng bit (bit-by-bit copy) của phương tiện lưu trữ kỹ thuật số (HDD, SSD, USB...).
+### Ví dụ 1: Tạo ảnh đĩa với FTK Imager
+Quy trình thực hiện (Yêu cầu thiết bị lưu trữ ngoài để chứa file ảnh):
+1.  Chọn **File** -> **Create Disk Image**.
+2.  Chọn nguồn (Media Source): Thường là **Physical Drive** hoặc **Logical Drive**.
+3.  Chọn ổ đĩa muốn sao chép.
+4.  Chọn loại định dạng ảnh đĩa (Image Type).
+5.  Nhập thông tin bằng chứng (Evidence details).
+6.  Chọn thư mục đích và tên file. Có thể chỉnh cài đặt nén (compression) và phân mảnh (fragmentation).
+7.  Nhấn **Start**.
+8.  Theo dõi tiến trình. Sau khi xong, xem bản tóm tắt (imaging summary) và xác thực (verification) nếu đã chọn.
 
-* **Mục đích:** Bảo tồn trạng thái gốc của dữ liệu, đảm bảo tính toàn vẹn và không làm thay đổi bằng chứng gốc trong quá trình phân tích.
-
-### Các công cụ & giải pháp phổ biến:
-
-| Công cụ | Mô tả |
-| :--- | :--- |
-| **FTK Imager** | Công cụ phổ biến nhất. Tạo bản sao đĩa hoàn hảo, cho phép xem và phân tích nội dung mà không làm thay đổi dữ liệu. |
-| **AFF4 Imager** | Mã nguồn mở, miễn phí. Nổi bật với khả năng nén, trích xuất tệp dựa trên thời gian tạo và hỗ trợ nhiều hệ thống tệp. |
-| **DD và DCFLDD** | Tiện ích dòng lệnh trên Unix/Linux/macOS. `dd` là công cụ cơ bản, `dcfldd` là bản nâng cao hỗ trợ hashing (băm) để kiểm tra toàn vẹn. |
-| **Virtualization Tools** | Đối với máy ảo (VM), bằng chứng được thu thập bằng cách tạm dừng hệ thống hoặc sử dụng tính năng Snapshot (chụp nhanh). |
-
-
-
-### Quy trình mẫu:
-1.  **Tạo ảnh đĩa với FTK Imager:** Chọn nguồn (Physical/Logical Drive) -> Chọn đích đến -> Chọn loại ảnh (E01, Raw...) -> Bắt đầu (Start).
-2.  **Mount ảnh đĩa với Arsenal Image Mounter:** Cho phép gắn (mount) các file ảnh đĩa (như `.vmdk`, `.e01`) thành một ổ đĩa thực trong Windows.
-    * *Lưu ý quan trọng:* Luôn chọn chế độ **Read-only** (Chỉ đọc) để bảo vệ tính toàn vẹn của bằng chứng gốc.
-
----
-
-## 2. Trích xuất Bằng chứng trên Máy chủ & Phân loại Nhanh (Host-based Evidence & Rapid Triage)
-
-### 2.1. Host-based Evidence (Bằng chứng trên máy chủ)
-Hệ điều hành hiện đại tạo ra vô số dấu vết từ việc chạy ứng dụng, sửa file hay tạo tài khoản người dùng.
-
-* **Dữ liệu dễ bay hơi (Volatile Data):** Dữ liệu biến mất khi tắt máy hoặc đăng xuất (ví dụ: RAM).
-    * *Tầm quan trọng:* Rất quan trọng khi điều tra mã độc (malware) vì mã độc thường để lại dấu vết trong RAM.
-* **Dữ liệu không bay hơi (Non-volatile Data):** Tồn tại trên ổ cứng (Registry, Event Logs, Prefetch...).
-
-**Các công cụ thu thập bộ nhớ (RAM):**
-* **WinPmem:** Driver thu thập bộ nhớ mã nguồn mở mặc định cho Windows.
-* **DumpIt:** Tiện ích đơn giản, gộp bộ nhớ hệ thống 32-bit và 64-bit vào một file output duy nhất.
-* **MemDump:** Công cụ dòng lệnh nhẹ, bắt nội dung RAM nhanh chóng.
-* **Belkasoft RAM Capturer:** Công cụ miễn phí mạnh mẽ, có khả năng vượt qua các cơ chế chống debug/dumping của mã độc.
-* **Magnet RAM Capture:** Công cụ miễn phí, đơn giản từ Magnet Forensics.
-* **LiME (Linux Memory Extractor):** Module hạt nhân (LKM) cho Linux, hoạt động trong suốt với hệ thống đích để tránh các biện pháp chống điều tra.
-
-
-
-### 2.2. Rapid Triage (Phân loại nhanh)
-Thay vì sao chụp toàn bộ ổ cứng (tốn thời gian), phương pháp này tập trung thu thập dữ liệu có giá trị cao nhất để phân tích nhanh.
-
-**Công cụ tiêu biểu: KAPE (Kroll Artifact Parser and Extractor)**
-KAPE giúp thu thập và xử lý các hiện vật pháp y từ Windows một cách nhanh chóng.
-* **Cơ chế hoạt động:**
-    * **Targets (Mục tiêu):** Định nghĩa *cái gì* cần lấy (ví dụ: Registry, Event Logs). File cấu hình đuôi `.tkape`.
-    * **Modules:** Định nghĩa *làm gì* với dữ liệu đã lấy (ví dụ: Phân tích cú pháp file prefetch).
-* **Chế độ:** Hỗ trợ cả dòng lệnh (CLI - `kape.exe`) và giao diện đồ họa (GUI - `gkape.exe`).
-* **Compound Targets:** Cho phép gom nhiều Targets lại để chạy một lần (ví dụ: `!SANS_Triage`).
-
-
-
-**Thu thập từ xa với Velociraptor:**
-* Dùng cho quy mô lớn (EDR).
-* Sử dụng truy vấn VQL (Velociraptor Query Language) để săn tìm (Hunt) các hiện vật trên toàn mạng.
-* Có thể tích hợp logic thu thập của KAPE thông qua `Windows.KapeFiles.Targets`.
-* Hỗ trợ dump RAM từ xa qua `Windows.Memory.Acquisition`.
+### Ví dụ 2: Mount (Gắn) ảnh đĩa với Arsenal Image Mounter
+Quy trình mount file `.vmdk` (từ máy ảo VMWare) để phân tích:
+1.  Cài đặt và chạy **Arsenal Image Mounter** với quyền **Administrator**.
+2.  Chọn **Mount disk image** và trỏ đến file `.vmdk`.
+3.  **Quan trọng:** Chọn chế độ **Read-only** (Chỉ đọc) để bảo vệ tính toàn vẹn của bằng chứng gốc.
+4.  Sau khi mount, ổ đĩa sẽ xuất hiện trong máy (ví dụ ổ `D:\`).
 
 ---
 
-## 3. Trích xuất Bằng chứng Mạng (Extracting Network Evidence)
+## 2. Trích xuất Bằng chứng Host-based & Phân loại nhanh (Rapid Triage)
 
-Bằng chứng mạng cung cấp cái nhìn về luồng dữ liệu và giao tiếp trong hệ thống.
+### Bằng chứng trên Host (Host-based Evidence)
+Hệ điều hành (như Windows) tạo ra vô số artifact từ việc chạy ứng dụng, sửa file, tạo user...
 
-* **Traffic Capture (Thu thập lưu lượng):**
-    * Sử dụng **Wireshark** hoặc **tcpdump**.
-    * Là "bản chụp" chi tiết từng gói tin (packet) đang di chuyển.
-* **IDS/IPS Data:**
-    * Hệ thống phát hiện/ngăn chặn xâm nhập cung cấp cảnh báo về các hoạt động đáng ngờ hoặc độc hại đã được nhận diện.
-* **Traffic Flow (Luồng lưu lượng):**
-    * Sử dụng **NetFlow** hoặc **sFlow**.
-    * Cung cấp cái nhìn tổng quan: Ai nói chuyện với ai, khi nào, bao nhiêu dữ liệu (metadata của kết nối), nhưng không chứa nội dung gói tin.
-* **Firewall Logs (Nhật ký tường lửa):**
-    * Ghi lại các kết nối được phép (allow) hoặc bị chặn (block).
-    * Giúp xác định nỗ lực khai thác lỗ hổng hoặc truy cập trái phép.
+
+
+**A. Dữ liệu khả biến (Volatile Data - RAM):**
+Dữ liệu biến mất khi tắt máy hoặc logoff. Rất quan trọng để tìm malware vì chúng thường để lại dấu vết trong RAM.
+* **Công cụ thu thập RAM:**
+    1.  **FTK Imager:** Dùng phổ biến để capture memory.
+    2.  **WinPmem:** Driver mã nguồn mở mặc định cho Windows (tách ra từ dự án Rekall).
+    3.  **DumpIt:** Tiện ích đơn giản, gộp bộ nhớ vật lý 32-bit và 64-bit vào một file.
+    4.  **MemDump:** Công cụ dòng lệnh miễn phí, đơn giản.
+    5.  **Belkasoft RAM Capturer:** Miễn phí, mạnh mẽ, có thể vượt qua các cơ chế chống debug/chống dump của malware.
+    6.  **Magnet RAM Capture:** Miễn phí, đơn giản.
+    7.  **LiME (Linux Memory Extractor):** Module hạt nhân (LKM) cho Linux, hoạt động trong suốt để tránh các biện pháp chống forensics.
+
+* **Ví dụ thu thập RAM:**
+    * *Với WinPmem:* Chạy CMD quyền Admin: `winpmem_mini_x64_rc2.exe memdump.raw`
+    * *Với Máy ảo (VM):* Suspend máy ảo -> Tìm file `.vmem` trong thư mục máy ảo.
+
+**B. Dữ liệu bất biến (Non-volatile Data - Disk):**
+Dữ liệu còn lại sau khi tắt máy: Registry, Windows Event Log, Prefetch, Amcache, IIS logs, Browser history.
+
+### Phân loại nhanh (Rapid Triage) & KAPE
+Mục tiêu: Tập trung thu thập dữ liệu giá trị cao để phân tích nhanh, thay vì sao chép toàn bộ ổ cứng.
+
+**KAPE (Kroll Artifact Parser and Extractor):**
+Công cụ mạnh mẽ để thu thập và xử lý artifact từ Windows.
+* **Nguyên lý:**
+    * **Targets (Mục tiêu):** Định nghĩa *cái gì* cần lấy (file artifacts). File cấu hình đuôi `.tkape`.
+        * Ví dụ: `RegistryHivesSystem.tkape` sẽ lấy các file SAM, SYSTEM... từ `C:\Windows\System32\config`.
+    * **Modules:** Định nghĩa *làm gì* với dữ liệu đã lấy (xử lý, phân tích).
+    * **Compound Targets:** Kết hợp nhiều Targets lại với nhau để chạy 1 lần (Ví dụ: `!SANS_Triage`).
+* **Chế độ:** Có cả CLI (`kape.exe`) và GUI (`gkape.exe`).
+
+
+
+**Quy trình chạy KAPE (GUI):**
+1.  Chọn **Target source** (Ổ đĩa cần lấy, ví dụ `D:\`).
+2.  Chọn **Target destination** (Nơi lưu dữ liệu thô thu được).
+3.  Chọn **Targets** (Ví dụ `!SANS_Triage`).
+4.  Nhấn **Execute**.
+5.  KAPE sẽ copy các file (kể cả file đang bị khóa bởi hệ điều hành như `$MFT`, `$LogFile` nhờ cơ chế riêng) sang thư mục đích.
+
+### Thu thập từ xa (Remote Collection) với EDR & Velociraptor
+* **EDR (Endpoint Detection and Response):** Cho phép thu thập bằng chứng từ xa trên toàn mạng lưới thay vì từng máy lẻ.
+* **Velociraptor:**
+    * Sử dụng ngôn ngữ truy vấn VQL (Velociraptor Query Language).
+    * Thực hiện các cuộc **Hunts** để thu thập artifact hàng loạt.
+    * Tận dụng các định nghĩa của KAPE thông qua **Windows.KapeFiles.Targets**.
+    * **Quy trình:** Tạo Hunt mới -> Chọn Artifact (`Windows.KapeFiles.Targets` hoặc `Windows.Memory.Acquisition` cho RAM) -> Launch -> Download kết quả.
+
+---
+
+## 3. Trích xuất Bằng chứng Mạng (Network Evidence)
+
+Dữ liệu mạng là nền tảng cho bất kỳ SOC Analyst nào.
+
+1.  **Phân tích Gói tin (Traffic Capture Analysis):**
+    * Công cụ: **Wireshark**, **tcpdump**.
+    * Chức năng: Chụp ảnh (snapshot) mọi cuộc hội thoại kỹ thuật số, cho phép xem chi tiết từng gói tin (granular view).
+2.  **IDS/IPS:**
+    * **IDS (Intrusion Detection System):** Giám sát và cảnh báo khi thấy hoạt động đáng ngờ.
+    * **IPS (Intrusion Prevention System):** Phát hiện và tự động chặn hành động độc hại.
+3.  **Traffic Flow (Luồng dữ liệu):**
+    * Công cụ: **NetFlow**, **sFlow**.
+    * Chức năng: Cung cấp cái nhìn tổng quan (high-level) về mẫu lưu lượng mạng (ai nói chuyện với ai, bao lâu), không đi sâu vào nội dung gói tin.
+4.  **Firewalls (Tường lửa):**
+    * Chức năng: Chặn/cho phép traffic dựa trên luật.
+    * Firewall hiện đại có thể nhận diện ứng dụng, user và chặn mối đe dọa.
+    * **Log Firewall:** Dùng để phát hiện nỗ lực khai thác lỗ hổng hoặc truy cập trái phép.

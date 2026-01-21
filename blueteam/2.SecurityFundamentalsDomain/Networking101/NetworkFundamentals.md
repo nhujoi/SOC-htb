@@ -66,3 +66,13 @@ Bài học này cung cấp kiến thức nền tảng về mạng máy tính cho
 * **Cấu trúc:** Gồm 6 cặp số thập lục phân (hexadecimal), ngăn cách bởi dấu hai chấm.
     * Ví dụ: `00:00:83:b1:c0:8e`
 * **Cách xem trên Windows:** Tìm kiếm "Network Status" -> Chọn "View your network properties".
+
+
+
+https://tools.ietf.org/html/rfc793
+https://tools.ietf.org/html/rfc7323
+https://tools.ietf.org/html/rfc768
+https://www.youtube.com/user/professormesser/playlists
+https://www.cisco.com/c/dam/global/fi_fi/assets/docs/SMB_University_120307_Networking_Fundamentals.pdf
+https://www.proprofs.com/quiz-school/topic/computer-network
+https://www.learnabhi.com/computer-networking-quiz/
